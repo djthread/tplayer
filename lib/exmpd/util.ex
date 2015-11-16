@@ -19,7 +19,7 @@ defmodule ExMpd.Util do
     ver
   end
 
-  @doc ~S/Turn the status string from mpd into an updated state object/
+  @doc ~S/Turn the status string from mpd into an updated state object./
   def parse_status(str, state = %State{}) when is_binary(str) do
     str |> String.split("\n") |> parse_status(state)
   end
