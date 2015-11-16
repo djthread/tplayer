@@ -1,4 +1,4 @@
-defmodule TPlayer.Db do
+defmodule TPlayer.Modules.Db do
 
   def init do
     IO.puts "Hi"
