@@ -2,14 +2,16 @@ defmodule ExMpd.Worker do
   @moduledoc ~S/Control all the MPD things!/
   use GenServer
 
+  require Logger
+
   import ExMpd.Util
 
   alias ExMpd.Config
   alias ExMpd.State
 
   @doc ~S/Start an MPD client instance/
-  def start_link(opts \\ %Config{}) do
-    {:ok, _} = GenServer.start_link __MODULE__, opts, name: __MODULE__
+  def start_link(config = %Config{} \\ %Config{}) do
+    {:ok, _} = GenServer.start_link __MODULE__, config, name: __MODULE__
   end
 
   @doc ~S/Update and return the current status/
@@ -19,11 +21,13 @@ defmodule ExMpd.Worker do
   ## GenServer Implementation
   #
 
-  def init(conf = %Config{}) do
-    uri     = %URI{scheme: "tcp", host: conf.host, port: conf.port}
+  def init(config = %Config{}) do
+    Logger.info "Connecting to #{config.host}:#{config.port}..."
+    uri     = %URI{scheme: "tcp", host: config.host, port: config.port}
     socket  = uri    |> connect! 
     version = socket |>    recv! |> motd_to_version
-    state   = %State{opts: conf, socket: socket, version: version}
+    state   = %State{config: config, socket: socket, version: version}
+    Logger.info "Connected to MPD (#{version})"
 
     {:ok, state}
   end

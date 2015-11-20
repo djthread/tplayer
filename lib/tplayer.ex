@@ -1,17 +1,21 @@
 defmodule TPlayer do
   use Application
 
-  @worker ExMpd.Worker
-  @host   "mobius.threadbox.net"
+  @exmpd   ExMpd.Worker
+  @tplayer TPlayer.Worker
+  @host    "localhost"
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
-  def start(_type, _args) do
+  def start(type, args) do
     import Supervisor.Spec, warn: false
 
     children = [
       # Define workers and child supervisors to be supervised
-      worker(@worker, [%ExMpd.Config{host: @host}]),
+      worker(@exmpd, [%ExMpd.Config{
+        host: (args[:host] || @host)
+      }]),
+      worker(@tplayer, [%TPlayer.Config{}])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

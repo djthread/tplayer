@@ -1,5 +1,5 @@
 defmodule ExMpd.State do
-  defstruct opts:      %ExMpd.Options{},
+  defstruct config:    %ExMpd.Config{},
             socket:    nil,
             pl:        [],
             version:   nil,

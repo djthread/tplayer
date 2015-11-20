@@ -7,6 +7,7 @@ defmodule TPlayer.Mixfile do
      elixir: "~> 1.1",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     # escript: [main_module: TPlayer],
      deps: deps]
   end
 
@@ -15,7 +16,10 @@ defmodule TPlayer.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [applications: [:logger],
-     mod: {TPlayer, []}]
+     mod: {TPlayer, [
+       # host: "mobius.threadbox.net"
+     ]}
+    ]
   end
 
   # Dependencies can be Hex packages:

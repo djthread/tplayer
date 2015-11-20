@@ -29,6 +29,8 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
+# config :logger, compile_time_purge_level: :info
+
 config :tplayer, cache_dir: Path.expand("~/.tplayer/")
 
 config :tplayer, modules: [
