@@ -14,24 +14,29 @@ defmodule ExMpd.Worker do
     {:ok, _} = GenServer.start_link __MODULE__, config, name: __MODULE__
   end
 
-  @doc ~S/Update and return the current status/
-  def status(), do: GenServer.call __MODULE__, :status
-
+  # @doc ~S/
 
   ## GenServer Implementation
   #
 
   def init(config = %Config{}) do
     Logger.info "Connecting to #{config.host}:#{config.port}..."
-    uri     = %URI{scheme: "tcp", host: config.host, port: config.port}
-    socket  = uri    |> connect! 
-    version = socket |>    recv! |> motd_to_version
+    socket  = connect! config.host, config.port
+    version = socket |> recv! |> motd_to_version
     state   = %State{config: config, socket: socket, version: version}
     Logger.info "Connected to MPD (#{version})"
+    Logger.debug "ExMpd State: " <> inspect state
 
     {:ok, state}
   end
 
+  def handle_call(:state, _from, state = %State{}) do
+    {:reply, state, state}
+  end
+  def handle_call({:call, command}, _from, state = %State{socket: socket}) do
+    socket |> send!(command)
+    {:reply, socket |> recv_lines_till_ok!, state}
+  end
   def handle_call(:status, _from, state = %State{socket: socket}) do
     socket |> send!("status")
     state = socket |> recv! |> parse_status(state)

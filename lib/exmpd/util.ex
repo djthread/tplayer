@@ -3,12 +3,27 @@ defmodule ExMpd.Util do
 
   alias ExMpd.State
 
-  @status_fields ~w(volume repeat random single consume playlist
-                    playlistlength mixrampdb state)
+  def connect!(host, port), do: Socket.TCP.connect! host, port#, packet: :line
+  def recv!(socket),        do: Socket.Stream.recv! socket
+  def send!(socket, msg),   do: Socket.Stream.send! socket, "#{msg}\n"
 
-  def connect!(uri),      do: Socket.connect!      uri
-  def recv!(socket),      do: Socket.Stream.recv!  socket
-  def send!(socket, msg), do: Socket.Stream.send!  socket, "#{msg}\n"
+  def recv_lines_till_ok!(socket) do
+    _recv_lines_till_ok! socket, recv!(socket), ""
+  end
+  defp _recv_lines_till_ok!(socket, cur, acc) do
+    acc = acc <> cur
+    if String.ends_with?(acc, "\nOK\n") do
+      IO.inspect acc
+      IO.puts "DONE"
+      acc
+    else
+      IO.inspect String.length(acc)
+      # IO.inspect "well, it's " <> acc
+      receive do after 200 ->
+        _recv_lines_till_ok! socket, recv!(socket), acc
+      end
+    end
+  end
 
   def recv_ok!(socket, state) do
     "OK\n" = Socket.Stream.recv!(socket, state)

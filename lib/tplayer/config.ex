@@ -1,3 +1,7 @@
 defmodule TPlayer.Config do
-  defstruct cache_dir: nil
+
+  defstruct base_dir:  "~/.tplayer",
+            cache_dir: "cache",
+            modules:   []
+
 end
