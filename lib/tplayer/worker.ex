@@ -11,9 +11,11 @@ defmodule TPlayer.Worker do
     {:ok, _} = GenServer.start_link __MODULE__, config, name: __MODULE__
   end
 
-  @doc ~S/Dispatch a request/
+  @doc ~S/Dispatch a call request/
   def call(req), do: GenServer.call __MODULE__, :call, [req]
 
+  @doc ~S/Dispatch a cast/
+  def cast(msg), do: GenServer.cast __MODULE__, :call, [msg]
 
   ## GenServer Implementation
   #
@@ -22,7 +24,7 @@ defmodule TPlayer.Worker do
 
     # Normalize the config
     config = config
-    |> Map.put(:base_dir, _fix_path(config.base_dir, "/"))
+    |> Map.put(:base_dir,  _fix_path(config.base_dir, Path.expand("~")))
     |> Map.put(:cache_dir, _fix_path(config.cache_dir, config.base_dir))
 
     # Make sure the dirs exist
@@ -39,20 +41,26 @@ defmodule TPlayer.Worker do
   end
 
   @doc ~S/Invoke an action. We'll figure out which module it's for./
-  def handle_call(:state, _from, st = %State{}), do: {:reply, st, st}
   def handle_call(req, _from, st = %State{}) when is_atom(req) or is_tuple(req) do
-    _call req, st.config.modules, st
+    _dispatch :call, req, st.config.modules, st
+  end
+  def handle_cast(msg, _from, st = %State{}) when is_atom(msg) or is_tuple(msg) do
+    _dispatch :cast, msg, st.config.modules, st
   end
 
-  defp _call(req, [module | tail], st = %State{}) do
+  @doc ~S/Do a :call or :cast on the correct module./
+  defp _dispatch(type, input, [module | tail], st = %State{}) do
     try do
-      module.call req, st
+      case type do
+        :call -> module.call input, st
+        :cast -> module.cast input, st
+      end
     rescue
       _ in [FunctionClauseError, UndefinedFunctionError] ->
-        _call req, tail, st
+        _dispatch type, input, tail, st
     end
   end
-  defp _call(req, [], _), do: {:error, "No handler found for: " <> inspect(req)}
+  defp _dispatch(type, input, [], _), do: {:error, "No handler found for: " <> inspect(input)}
 
   defp _fix_path(path = "/" <> _, _base), do: path
   defp _fix_path(path, base),             do: Path.expand(path, base)

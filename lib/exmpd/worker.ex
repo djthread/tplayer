@@ -1,6 +1,5 @@
 defmodule ExMpd.Worker do
   @moduledoc ~S/Control all the MPD things!/
-  use GenServer
 
   require Logger
 
@@ -13,8 +12,6 @@ defmodule ExMpd.Worker do
   def start_link(config = %Config{} \\ %Config{}) do
     {:ok, _} = GenServer.start_link __MODULE__, config, name: __MODULE__
   end
-
-  # @doc ~S/
 
   ## GenServer Implementation
   #
@@ -47,4 +44,14 @@ defmodule ExMpd.Worker do
     state = socket |> recv_ok!(state)
   end
 
+  def handle_cast({:cast, :refresh}, _from, state = %State{socket: socket}) do
+    Logger.debug "Spawning refresher..."
+    pid = spawn_link &_refresher/0
+    {:noreply, Map.put(state, :refresher, pid)}
+  end
+
+  defp _refresher(st = %State{}) do
+    socket |> send!(command)
+    GenServer.call __MODULE__, :call, [update_state: %State{albums: albums}]
+  end
 end

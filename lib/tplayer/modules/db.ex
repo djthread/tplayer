@@ -1,4 +1,5 @@
 defmodule TPlayer.Modules.Db do
+  use GenServer
 
   alias TPlayer.State
 
@@ -6,11 +7,17 @@ defmodule TPlayer.Modules.Db do
     st
   end
 
-  def call(:refresh, st = %State{}) do
-    {:ok, st |> _loadAlbums}
+  def cast(:refresh, st = %State{}) do
+    pid = _start_refresh_albums st
+    {:ok, Map.put(st, :refresher, pid)}
   end
 
-  defp _loadAlbums(st = %State{}) do
+  def 
+
+  defp _start_refresh_albums(st = %State{}) do
+  end
+
+  defp _refresh_albums(st = %State{}) do
     file          = st.config.cache_dir <> "/albums"
     cache_exists? = File.exists? file
 
@@ -19,7 +26,7 @@ defmodule TPlayer.Modules.Db do
     else
       albs = ExMpd.call("list album")
              # |> Enum.map(&String.trim_prefix(&1, "Album: "))  # waiting for 1.2
-             |> Enum.map(fn(a) -> [_, a] = Regex.run ~r/^Album: (.*)$/, a; a end)
+             |> Enum.map(fn(a) -> [_, a] = Regex.run(~r/^Album: (.*)$/, a); a end)
              |> Enum.filter(&(&1 != ""))
       :ok = File.write! file, Enum.join(albs, "\n")
       albs

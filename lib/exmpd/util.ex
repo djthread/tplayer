@@ -12,14 +12,12 @@ defmodule ExMpd.Util do
   end
   defp _recv_lines_till_ok!(socket, cur, acc) do
     acc = acc <> cur
+    IO.puts "\n\n" <> String.slice(acc, -20, 20) <> " (#{String.length(acc)})"
     if String.ends_with?(acc, "\nOK\n") do
-      IO.inspect acc
       IO.puts "DONE"
       acc
     else
-      IO.inspect String.length(acc)
-      # IO.inspect "well, it's " <> acc
-      receive do after 200 ->
+      receive do after 50 ->
         _recv_lines_till_ok! socket, recv!(socket), acc
       end
     end
