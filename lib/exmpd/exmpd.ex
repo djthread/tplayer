@@ -8,4 +8,5 @@ defmodule ExMpd do
 
   def state,         do: GenServer.call @worker, :state
   def call(command), do: GenServer.call @worker, {:call, command}
+  def cast(command), do: GenServer.cast @worker, command
 end

@@ -1,5 +1,6 @@
 defmodule ExMpd.Util do
   require Socket
+  require Logger
 
   alias ExMpd.State
 
@@ -8,17 +9,25 @@ defmodule ExMpd.Util do
   def send!(socket, msg),   do: Socket.Stream.send! socket, "#{msg}\n"
 
   def recv_lines_till_ok!(socket) do
-    _recv_lines_till_ok! socket, recv!(socket), ""
+    _recv_lines_till_ok! socket, recv!(socket), "", []
   end
-  defp _recv_lines_till_ok!(socket, cur, acc) do
+  defp _recv_lines_till_ok!(socket, cur, acc, albums) do
     acc = acc <> cur
-    IO.puts "\n\n" <> String.slice(acc, -20, 20) <> " (#{String.length(acc)})"
+
+    new = String.split acc, "\n"
+
+    IO.inspect new
+
+    # IO.puts "\n\n" <>
+    #         String.slice(acc, -20, 20) <>
+    #         " (#{String.length(acc)})"
+
     if String.ends_with?(acc, "\nOK\n") do
       IO.puts "DONE"
       acc
     else
       receive do after 50 ->
-        _recv_lines_till_ok! socket, recv!(socket), acc
+        _recv_lines_till_ok! socket, recv!(socket), acc, albums
       end
     end
   end
@@ -30,6 +39,14 @@ defmodule ExMpd.Util do
   def motd_to_version(motd) do
     %{"ver" => ver} = Regex.named_captures ~r/OK MPD (?<ver>[\d\.]+)\n/, motd
     ver
+  end
+
+  def create_mpd_conn(host, port) do
+    Logger.info "Connecting to #{host}:#{port}..."
+    socket  = connect! host, port
+    version = socket |> recv! |> motd_to_version
+    Logger.info "Connected to MPD (#{version})"
+    {socket, version}
   end
 
   @doc ~S/Turn the status string from mpd into an updated state object./

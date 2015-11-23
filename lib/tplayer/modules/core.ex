@@ -1,4 +1,4 @@
-defmodule TPlayer.Modules.Db do
+defmodule TPlayer.Modules.Core do
   use GenServer
 
   alias TPlayer.State
@@ -7,15 +7,8 @@ defmodule TPlayer.Modules.Db do
     st
   end
 
-  def cast(:refresh, st = %State{}) do
-    ExMpd.cast {
-      :refresh,
-      fn(albums) ->
-        new_state = %State{albums: albums}
-        TPlayer.cast {:merge_state, new_state}
-      end
-    }
-    {:noreply, st}
+  def cast({:merge_state, state = %State{}}, st = %State{}) do
+    {:ok, Map.merge(st, state)}
   end
 
   defp _start_refresh_albums(st = %State{}) do
@@ -39,6 +32,6 @@ defmodule TPlayer.Modules.Db do
     Map.put st, :albums, albums
   end
 
-  # defp _album_file do
-  # end
+  defp _album_file do
+  end
 end

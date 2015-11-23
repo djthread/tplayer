@@ -44,23 +44,27 @@ defmodule TPlayer.Worker do
   def handle_call(req, _from, st = %State{}) when is_atom(req) or is_tuple(req) do
     _dispatch :call, req, st.config.modules, st
   end
-  def handle_cast(msg, _from, st = %State{}) when is_atom(msg) or is_tuple(msg) do
+  def handle_cast(msg, st = %State{}) when is_atom(msg) or is_tuple(msg) do
     _dispatch :cast, msg, st.config.modules, st
   end
 
   @doc ~S/Do a :call or :cast on the correct module./
-  defp _dispatch(type, input, [module | tail], st = %State{}) do
+  defp _dispatch(type, input, [mod | tail], st = %State{}) do
     try do
       case type do
-        :call -> module.call input, st
-        :cast -> module.cast input, st
+        :call -> mod.call input, st
+        :cast -> mod.cast input, st
       end
     rescue
       _ in [FunctionClauseError, UndefinedFunctionError] ->
         _dispatch type, input, tail, st
     end
   end
-  defp _dispatch(type, input, [], _), do: {:error, "No handler found for: " <> inspect(input)}
+  defp _dispatch(type, input, [], _) do
+    {:error, "No " <> Atom.to_string(type)
+          <> " handler found for: " <> inspect(input)
+    }
+  end
 
   defp _fix_path(path = "/" <> _, _base), do: path
   defp _fix_path(path, base),             do: Path.expand(path, base)

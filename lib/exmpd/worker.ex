@@ -17,41 +17,42 @@ defmodule ExMpd.Worker do
   #
 
   def init(config = %Config{}) do
-    Logger.info "Connecting to #{config.host}:#{config.port}..."
-    socket  = connect! config.host, config.port
-    version = socket |> recv! |> motd_to_version
-    state   = %State{config: config, socket: socket, version: version}
-    Logger.info "Connected to MPD (#{version})"
-    Logger.debug "ExMpd State: " <> inspect state
+    {socket, version} = create_mpd_conn config.host, config.port
+    st = %State{config: config, socket: socket, version: version}
 
-    {:ok, state}
+    Logger.debug "ExMpd State: " <> inspect st
+
+    {:ok, st}
   end
 
-  def handle_call(:state, _from, state = %State{}) do
-    {:reply, state, state}
+  def handle_call(:state, _from, st = %State{}) do
+    {:reply, st, st}
   end
-  def handle_call({:call, command}, _from, state = %State{socket: socket}) do
+  def handle_call({:call, command}, _from, st = %State{socket: socket}) do
     socket |> send!(command)
-    {:reply, socket |> recv_lines_till_ok!, state}
+    {:reply, socket |> recv_lines_till_ok!, st}
   end
-  def handle_call(:status, _from, state = %State{socket: socket}) do
+  def handle_call(:status, _from, st = %State{socket: socket}) do
     socket |> send!("status")
-    state = socket |> recv! |> parse_status(state)
-    {:reply, state, state}
+    st = socket |> recv! |> parse_status(st)
+    {:reply, st, st}
   end
-  def handle_call(:play, _from, state = %State{socket: socket}) do
+  def handle_call(:play, _from, st = %State{socket: socket}) do
     socket |> send!("play")
-    state = socket |> recv_ok!(state)
+    st = socket |> recv_ok!(st)
   end
 
-  def handle_cast({:cast, :refresh}, _from, state = %State{socket: socket}) do
+  def handle_cast({:refresh, func}, st = %State{}) do
     Logger.debug "Spawning refresher..."
-    pid = spawn_link &_refresher/0
-    {:noreply, Map.put(state, :refresher, pid)}
+    spawn_link fn -> _refresher st, func end
+    {:noreply, st}
   end
 
-  defp _refresher(st = %State{}) do
-    socket |> send!(command)
-    GenServer.call __MODULE__, :call, [update_state: %State{albums: albums}]
+  defp _refresher(%State{config: conf}, func) when is_function(func) do
+    {socket, _version} = create_mpd_conn conf.host, conf.port
+    socket |> send!("list album")
+    albums = socket |> recv_lines_till_ok!
+    func.(albums);
+    # GenServer.call __MODULE__, :call, [update_state: %State{albums: albums}]
   end
 end
