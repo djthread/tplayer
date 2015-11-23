@@ -4,41 +4,34 @@ defmodule TPlayer.Modules.Db do
   alias TPlayer.State
 
   def init(st = %State{}) do
-    st
+    st |> _load_albums_from_cache
   end
 
   def cast(:refresh, st = %State{}) do
     ExMpd.cast {
       :refresh,
       fn(albums) ->
-        new_state = %State{albums: albums}
-        TPlayer.cast {:merge_state, new_state}
+        TPlayer.cast {:merge_state, %{albums: albums}}
+        :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
       end
     }
     {:noreply, st}
   end
 
-  defp _start_refresh_albums(st = %State{}) do
-  end
-
-  defp _refresh_albums(st = %State{}) do
-    file          = st.config.cache_dir <> "/albums"
+  defp _load_albums_from_cache(st = %State{}) do
+    file          = _cache_file(st)
     cache_exists? = File.exists? file
 
-    albums = if cache_exists? do
-      File.read!(file) |> String.split("\n")
+    if cache_exists? do
+      albums = File.read!(file) |> String.split("\n")
+      Map.put st, :albums, albums
     else
-      albs = ExMpd.call("list album")
-             # |> Enum.map(&String.trim_prefix(&1, "Album: "))  # waiting for 1.2
-             |> Enum.map(fn(a) -> [_, a] = Regex.run(~r/^Album: (.*)$/, a); a end)
-             |> Enum.filter(&(&1 != ""))
-      :ok = File.write! file, Enum.join(albs, "\n")
-      albs
+      st
     end
-
-    Map.put st, :albums, albums
   end
 
-  # defp _album_file do
-  # end
+  defp _cache_file(st = %State{}) do
+    st.config.cache_dir <> "/albums"
+  end
+
 end

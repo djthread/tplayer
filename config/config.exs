@@ -34,5 +34,6 @@ use Mix.Config
 config :tplayer, cache_dir: Path.expand("~/.tplayer/")
 
 config :tplayer, modules: [
+  TPlayer.Modules.Core,
   TPlayer.Modules.Db
 ]

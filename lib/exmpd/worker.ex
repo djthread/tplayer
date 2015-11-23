@@ -42,17 +42,28 @@ defmodule ExMpd.Worker do
     st = socket |> recv_ok!(st)
   end
 
-  def handle_cast({:refresh, func}, st = %State{}) do
+  def handle_cast({:refresh, cb}, st = %State{}) do
     Logger.debug "Spawning refresher..."
-    spawn_link fn -> _refresher st, func end
+    spawn_link fn ->
+      _new_conn_get_albums st, cb
+    end
     {:noreply, st}
   end
 
-  defp _refresher(%State{config: conf}, func) when is_function(func) do
+  @doc ~S/With a new MPD connection, fetch a list of all the albums/
+  defp _new_conn_get_albums(%State{config: conf}, cb) when is_function(cb) do
     {socket, _version} = create_mpd_conn conf.host, conf.port
     socket |> send!("list album")
-    albums = socket |> recv_lines_till_ok!
-    func.(albums);
-    # GenServer.call __MODULE__, :call, [update_state: %State{albums: albums}]
+    socket
+    |> recv_lines_till_ok!
+    # |> Enum.map(&String.trim_prefix(&1, "Album: "))  # waiting for 1.2
+    |> Enum.map(fn(a) ->
+                  case Regex.run(~r/^Album: (.*)$/, a) do
+                    [_, a] -> a
+                    _      -> ""
+                  end
+               end)
+    |> Enum.filter(&(&1 != ""))
+    |> cb.()
   end
 end
