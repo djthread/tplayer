@@ -15,7 +15,7 @@ defmodule TPlayer.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger],
+    [applications: [:logger, :pooler],
      mod: {TPlayer, [
        # host: "mobius.threadbox.net"
      ]}
@@ -33,7 +33,8 @@ defmodule TPlayer.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:socket, "~> 0.3"}
+      {:socket, "~> 0.3"},
+      {:pooler, "~> 1.5"}
     ]
   end
 end

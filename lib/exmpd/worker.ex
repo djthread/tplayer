@@ -1,5 +1,7 @@
 defmodule ExMpd.Worker do
-  @moduledoc ~S/Control all the MPD things!/
+  @moduledoc ~S/Issue your ExMpd commands here!/
+
+  # use GenServer
 
   require Logger
 
@@ -28,7 +30,7 @@ defmodule ExMpd.Worker do
   def handle_call(:state, _from, st = %State{}) do
     {:reply, st, st}
   end
-  def handle_call({:call, command}, _from, st = %State{socket: socket}) do
+  def handle_call({:command, command}, _from, st = %State{socket: socket}) do
     socket |> send!(command)
     {:reply, socket |> recv_lines_till_ok!, st}
   end
@@ -39,7 +41,14 @@ defmodule ExMpd.Worker do
   end
   def handle_call(:play, _from, st = %State{socket: socket}) do
     socket |> send!("play")
-    st = socket |> recv_ok!(st)
+    socket |> recv_ok!(st)
+    {:reply, st, st}
+  end
+  def handle_call({:find_album, album}, _from, st = %State{socket: socket}) do
+    socket |> send!(~s[find album "#{album}"])
+    stuff = socket |> recv_lines_till_ok!
+    IO.inspect stuff
+    {:reply, st, st}
   end
 
   def handle_cast({:refresh, cb}, st = %State{}) do
@@ -50,8 +59,7 @@ defmodule ExMpd.Worker do
     {:noreply, st}
   end
 
-  @doc ~S/With a new MPD connection, fetch a list of all the albums/
-  defp _new_conn_get_albums(%State{config: conf}, cb) when is_function(cb) do
+  defp _new_conn_get_albums(%State{config: conf}, cb) when cb |> is_function do
     {socket, _version} = create_mpd_conn conf.host, conf.port
     socket |> send!("list album")
     socket

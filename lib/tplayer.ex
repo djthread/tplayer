@@ -3,7 +3,8 @@ defmodule TPlayer do
 
   @exmpd   ExMpd.Worker
   @tplayer TPlayer.Worker
-  @host    "mobius.threadbox.net"
+  # @host    "mobius.threadbox.net"
+  @host    "localhost"
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
@@ -33,6 +34,7 @@ defmodule TPlayer do
   # casts
   def refresh,      do: GenServer.cast @tplayer, :refresh
 
+  # generic calls
   def call(inputs), do: GenServer.call @tplayer, inputs
   def cast(inputs), do: GenServer.cast @tplayer, inputs
 end

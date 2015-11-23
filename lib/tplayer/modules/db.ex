@@ -1,10 +1,10 @@
 defmodule TPlayer.Modules.Db do
-  use GenServer
-
   alias TPlayer.State
 
   def init(st = %State{}) do
-    st |> _load_albums_from_cache
+    st
+    # IO.inspect(g = st |> _load_albums_from_cache)
+    # g
   end
 
   def cast(:refresh, st = %State{}) do

@@ -24,7 +24,7 @@ defmodule TPlayer.Worker do
 
     # Normalize the config
     config = config
-    |> Map.put(:base_dir,  _fix_path(config.base_dir, Path.expand("~")))
+    |> Map.put(:base_dir,  _fix_path(config.base_dir,  Path.expand("~")))
     |> Map.put(:cache_dir, _fix_path(config.cache_dir, config.base_dir))
 
     # Make sure the dirs exist
@@ -33,7 +33,13 @@ defmodule TPlayer.Worker do
     # Run module init routines
     st = Enum.reduce config.modules,
                      %State{config: config},
-                     fn m, acc -> m.init(acc) end
+                     fn(m, acc) ->
+                       try do
+                         m.init(acc)
+                       rescue
+                         UndefinedFunctionError -> acc
+                       end
+                     end
 
     Logger.debug "State: " <> inspect st
 
@@ -48,7 +54,6 @@ defmodule TPlayer.Worker do
     _dispatch :cast, msg, st.config.modules, st
   end
 
-  @doc ~S/Do a :call or :cast on the correct module./
   defp _dispatch(type, input, [mod | tail], st = %State{}) do
     try do
       case type do

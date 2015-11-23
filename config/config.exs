@@ -35,5 +35,23 @@ config :tplayer, cache_dir: Path.expand("~/.tplayer/")
 
 config :tplayer, modules: [
   TPlayer.Modules.Core,
-  TPlayer.Modules.Db
+  TPlayer.Modules.Db,
+  TPlayer.Modules.Random
+]
+
+config :pooler, pools: [
+  [
+    name:       mpd1,
+    group:      mpd
+    max_count:  5,
+    init_count: 2,
+    start_mfa:  {ExMpd.Connection, :start_link, [:mpd1]}
+  ],
+  [
+    name:       mpd2,
+    group:      mpd
+    max_count:  5,
+    init_count: 2,
+    start_mfa:  {ExMpd.Connection, :start_link, [:mpd2]}
+  ]
 ]
