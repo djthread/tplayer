@@ -31,27 +31,26 @@ use Mix.Config
 
 # config :logger, compile_time_purge_level: :info
 
-config :tplayer, cache_dir: Path.expand("~/.tplayer/")
+# @mpd_host localhost
+mpd_host = "mobius.threadbox.net"
+mpd_port = 6600
 
-config :tplayer, modules: [
-  TPlayer.Modules.Core,
-  TPlayer.Modules.Db,
-  TPlayer.Modules.Random
-]
+config :tplayer, mpd_host:  mpd_host,
+                 mpd_port:  mpd_port,
+                 cache_dir: Path.expand("~/.tplayer/"),
+                 modules:   [
+                   TPlayer.Modules.Core,
+                   TPlayer.Modules.Db,
+                   TPlayer.Modules.Random
+                 ]
 
 config :pooler, pools: [
   [
-    name:       mpd1,
-    group:      mpd
+    name:       :mpd,
+    # max_count:  1,
+    # init_count: 1,
     max_count:  5,
     init_count: 2,
-    start_mfa:  {ExMpd.Connection, :start_link, [:mpd1]}
-  ],
-  [
-    name:       mpd2,
-    group:      mpd
-    max_count:  5,
-    init_count: 2,
-    start_mfa:  {ExMpd.Connection, :start_link, [:mpd2]}
+    start_mfa:  {ExMpd.Connection, :start_link, [mpd_host, mpd_port]}
   ]
 ]

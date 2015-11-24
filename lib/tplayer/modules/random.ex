@@ -3,6 +3,11 @@ defmodule TPlayer.Modules.Random do
 
   require Logger
 
+  def init(st = %State{}) do
+    :random.seed(:erlang.now)
+    st
+  end
+
   def call({:random_track, number}, st = %State{}) when number |> is_integer do
     tracks = _get_random_tracks number, [], st
 

@@ -16,9 +16,7 @@ defmodule TPlayer.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [applications: [:logger, :pooler],
-     mod: {TPlayer, [
-       # host: "mobius.threadbox.net"
-     ]}
+     mod: {TPlayer, []}
     ]
   end
 

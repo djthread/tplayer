@@ -3,8 +3,6 @@ defmodule TPlayer do
 
   @exmpd   ExMpd.Worker
   @tplayer TPlayer.Worker
-  # @host    "mobius.threadbox.net"
-  @host    "localhost"
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
@@ -12,7 +10,8 @@ defmodule TPlayer do
     import Supervisor.Spec, warn: false
 
     exmpd = worker(@exmpd, [%ExMpd.Config{
-      host: @host
+      host: Application.get_env(:tplayer, :mpd_host),
+      port: Application.get_env(:tplayer, :mpd_port)
     }])
 
     tplayer = worker(@tplayer, [%TPlayer.Config{
