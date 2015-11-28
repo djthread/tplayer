@@ -1,8 +1,6 @@
 defmodule ExMpd.Worker do
   @moduledoc ~S/Issue your ExMpd commands here!/
 
-  # use GenServer
-
   require Logger
 
   import ExMpd.Util
@@ -14,6 +12,7 @@ defmodule ExMpd.Worker do
   def start_link(config = %Config{} \\ %Config{}) do
     {:ok, _} = GenServer.start_link __MODULE__, config, name: __MODULE__
   end
+
 
   ## GenServer Implementation
   #

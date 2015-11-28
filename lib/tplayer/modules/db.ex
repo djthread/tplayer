@@ -8,6 +8,7 @@ defmodule TPlayer.Modules.Db do
   end
 
   def cast(:refresh, st = %State{}) do
+    IO.puts "O HAI"
     ExMpd.cast {
       :refresh,
       fn(albums) ->
@@ -15,6 +16,7 @@ defmodule TPlayer.Modules.Db do
         :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
       end
     }
+
     {:noreply, st}
   end
 

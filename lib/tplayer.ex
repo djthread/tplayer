@@ -9,17 +9,18 @@ defmodule TPlayer do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    exmpd = worker(@exmpd, [%ExMpd.Config{
-      host: Application.get_env(:tplayer, :mpd_host),
-      port: Application.get_env(:tplayer, :mpd_port)
-    }])
+    # exmpd = worker(@exmpd, [%ExMpd.Config{
+    #   host: Application.get_env(:tplayer, :mpd_host),
+    #   port: Application.get_env(:tplayer, :mpd_port)
+    # }])
 
     tplayer = worker(@tplayer, [%TPlayer.Config{
       base_dir: "~/.tplayer",
       modules:  Application.get_env(:tplayer, :modules)
     }])
 
-    children = [exmpd, tplayer]
+    # children = [exmpd, tplayer]
+    children = [tplayer]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options

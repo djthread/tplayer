@@ -16,6 +16,7 @@ defmodule ExMpd.Connection do
 
   ## GenServer Implementation
   #
+
   def init([host, port]) when port |> is_integer do
     Logger.debug "Connecting to #{host}:#{port}..."
     socket  = connect!(host, port)

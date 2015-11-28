@@ -31,8 +31,8 @@ use Mix.Config
 
 # config :logger, compile_time_purge_level: :info
 
-# @mpd_host localhost
-mpd_host = "mobius.threadbox.net"
+mpd_host = "localhost"
+# mpd_host = "mobius.threadbox.net"
 mpd_port = 6600
 
 config :tplayer, mpd_host:  mpd_host,
