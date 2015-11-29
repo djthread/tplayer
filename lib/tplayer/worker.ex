@@ -55,21 +55,28 @@ defmodule TPlayer.Worker do
     _dispatch :cast, msg, st.config.modules, st
   end
 
-  defp _dispatch(type, input, [mod | tail], st = %State{}) do
-    try do
-      case type do
-        :call -> mod.call input, st
-        :cast -> mod.cast input, st
-      end
-    rescue
-      _ in [FunctionClauseError, UndefinedFunctionError] ->
-        _dispatch type, input, tail, st
+  defp _dispatch(type, input, modules, st = %State{}) do
+    to_f_atom = fn(name) -> Atom.to_string(type) <> "_#{name}" |> String.to_atom end
+    cond do
+      input |> is_atom  -> [input |> to_f_atom.()]
+      input |> is_tuple ->
+        list = input |> Tuple.to_list
+        [hd(list) |> to_f_atom.() | tl(list)]
+    end
+    |> _dispatch modules, st
+  end
+  defp _dispatch([f_atom | params], [mod | tail], st = %State{}) when is_atom(f_atom) do
+    if :functions |> mod.__info__ |> List.keymember?(f_atom, params |> length) do
+      Logger.debug "Invoking #{Atom.to_string mod}.#{Atom.to_string f_atom}..."
+      Logger.debug (params ++ [st])
+      apply mod, f_atom, (params ++ [st])
+      # apply mod, f_atom, params ++ [st]
+    else
+      _dispatch [f_atom | params], tail, st
     end
   end
-  defp _dispatch(type, input, [], _) do
-    {:error, "No " <> Atom.to_string(type)
-          <> " handler found for: " <> inspect(input)
-    }
+  defp _dispatch([f_atom | params], [], _) do
+    {:error, "No method found: " <> Atom.to_string(f_atom) <> " (#{inspect params})"}
   end
 
   defp _fix_path(path = "/" <> _, _base), do: path

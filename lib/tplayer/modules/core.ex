@@ -1,12 +1,12 @@
 defmodule TPlayer.Modules.Core do
   alias TPlayer.State
 
-  def call(:state, st = %State{}) do
+  def call_state(st = %State{}) do
     {:reply, st, st}
   end
 
-  def cast({:merge_state, state = %{}}, st = %State{}) do
-    {:noreply, st |> Map.merge(state)}
+  def cast_merge_state(new_state = %{}, st = %State{}) do
+    {:noreply, st |> Map.merge(new_state)}
   end
 
 end

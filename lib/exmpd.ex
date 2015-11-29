@@ -10,17 +10,20 @@ defmodule ExMpd do
   # def call(command), do: GenServer.call @worker, command
   # def cast(command), do: GenServer.cast @worker, command
 
-  def call(command), do: call command
-  def cast(message), do: cast message
+  # def call(command), do: call command
+  # def cast(message), do: cast message
 
   defpool call(pid, command) when pid |> is_pid do
-    Logger.debug "calling(#{pid}): #{command}"
+    Logger.debug "Calling(#{inspect pid}): #{inspect command}"
     GenServer.call pid, command
   end
 
   defpool cast(pid, message) when pid |> is_pid do
-    Logger.debug "casting(#{pid}): #{message}"
+    Logger.debug "Casting(#{inspect pid}): #{inspect message}"
+    IO.inspect pid
+    IO.inspect message
     GenServer.cast pid, message
+    {:ok, :right}
   end
 
 end

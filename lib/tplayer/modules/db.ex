@@ -7,16 +7,12 @@ defmodule TPlayer.Modules.Db do
     # g
   end
 
-  def cast(:refresh, st = %State{}) do
-    IO.puts "O HAI"
-    ExMpd.cast {
-      :refresh,
-      fn(albums) ->
-        TPlayer.cast {:merge_state, %{albums: albums}}
-        :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
-      end
-    }
-
+  def cast_refresh_albums(st = %State{}) do
+    spawn_link fn ->
+      albums = ExMpd.call {:command, "list album"}
+      TPlayer.cast {:merge_state, %{albums: albums}}
+      :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
+    end
     {:noreply, st}
   end
 

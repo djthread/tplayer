@@ -32,9 +32,15 @@ defmodule TPlayer do
   def state,        do: GenServer.call @tplayer, :state
 
   # casts
-  def refresh,      do: GenServer.cast @tplayer, :refresh
+  def refresh,      do: GenServer.cast @tplayer, :refresh_albums
 
   # generic calls
   def call(inputs), do: GenServer.call @tplayer, inputs
   def cast(inputs), do: GenServer.cast @tplayer, inputs
+end
+
+defmodule TP do
+  def ref,          do: TP.refresh
+  def refresh,      do: TPlayer.refresh
+  def cast(inputs), do: TPlayer.cast inputs
 end

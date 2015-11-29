@@ -47,6 +47,7 @@ config :tplayer, mpd_host:  mpd_host,
 config :pooler, pools: [
   [
     name:       :mpd,
+    group:      :mpd,
     # max_count:  1,
     # init_count: 1,
     max_count:  5,
