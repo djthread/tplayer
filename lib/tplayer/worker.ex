@@ -66,11 +66,11 @@ defmodule TPlayer.Worker do
     |> _dispatch modules, st
   end
   defp _dispatch([f_atom | params], [mod | tail], st = %State{}) when is_atom(f_atom) do
-    if :functions |> mod.__info__ |> List.keymember?(f_atom, params |> length) do
+    # IO.puts(Atom.to_string(mod) <> ":" <> Atom.to_string(f_atom) <> " (#{params |> length})")
+    # :functions |> mod.__info__ |> IO.inspect
+    if {f_atom, length(params)} in mod.__info__(:functions) do
       Logger.debug "Invoking #{Atom.to_string mod}.#{Atom.to_string f_atom}..."
-      Logger.debug (params ++ [st])
-      apply mod, f_atom, (params ++ [st])
-      # apply mod, f_atom, params ++ [st]
+      apply mod, f_atom, params ++ [st]
     else
       _dispatch [f_atom | params], tail, st
     end
