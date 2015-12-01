@@ -27,16 +27,15 @@ defmodule TPlayer.Worker do
     |> Map.put(:cache_dir, _fix_path(config.cache_dir, config.base_dir))
 
     # Make sure the dirs exist
-    [config.base_dir, config.cache_dir] |> Enum.each &File.mkdir_p!/1
+    # [config.base_dir, config.cache_dir] |> Enum.each &File.mkdir_p!/1
 
-    # Run module init routines
+    # Run module init routines, pipelining the state through
     st = Enum.reduce config.modules,
                      %State{config: config},
                      fn(m, acc) ->
-                       try do
-                         m.init(acc)
-                       rescue
-                         UndefinedFunctionError -> acc
+                       case {:init, 1} in m.__info__(:functions) do
+                         true -> m.init(acc)
+                         _    -> acc
                        end
                      end
 
@@ -56,9 +55,10 @@ defmodule TPlayer.Worker do
   defp _dispatch(type, input, modules, st = %State{}) do
     to_f_atom = fn(name) -> Atom.to_string(type) <> "_#{name}" |> String.to_atom end
     cond do
-      input |> is_atom  -> [input |> to_f_atom.()]
-      input |> is_tuple ->
-        list = input |> Tuple.to_list
+      is_atom(input) ->
+        [input |> to_f_atom.()]
+      is_tuple(input) ->
+        list = Tuple.to_list(input)
         [hd(list) |> to_f_atom.() | tl(list)]
     end
     |> _dispatch modules, st

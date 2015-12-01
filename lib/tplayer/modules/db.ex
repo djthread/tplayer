@@ -21,7 +21,7 @@ defmodule TPlayer.Modules.Db do
                |> Enum.filter(&(&1 != ""))
 
       TPlayer.cast {:merge_state, %{albums: albums}}
-      :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
+      # :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
       Logger.info "Finished album refresh, found #{length(albums)}"
     end
     {:noreply, st}
