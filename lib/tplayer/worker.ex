@@ -1,10 +1,8 @@
 defmodule TPlayer.Worker do
-  use GenServer
-
+  use     GenServer
   require Logger
-
-  alias TPlayer.Config
-  alias TPlayer.State
+  alias   TPlayer.Config
+  alias   TPlayer.State
 
   @doc ~S/Start TPlayer app/
   def start_link(config = %Config{} \\ %Config{}) do
@@ -66,9 +64,7 @@ defmodule TPlayer.Worker do
     |> _dispatch modules, st
   end
   defp _dispatch([f_atom | params], [mod | tail], st = %State{}) when is_atom(f_atom) do
-    # IO.puts(Atom.to_string(mod) <> ":" <> Atom.to_string(f_atom) <> " (#{params |> length})")
-    # :functions |> mod.__info__ |> IO.inspect
-    if {f_atom, length(params)} in mod.__info__(:functions) do
+    if {f_atom, length(params) + 1} in mod.__info__(:functions) do
       Logger.debug "Invoking #{Atom.to_string mod}.#{Atom.to_string f_atom}..."
       apply mod, f_atom, params ++ [st]
     else

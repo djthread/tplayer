@@ -2,11 +2,9 @@ defmodule ExMpd.Worker do
   @moduledoc ~S/Issue your ExMpd commands here!/
 
   require Logger
-
-  import ExMpd.Util
-
-  alias ExMpd.Config
-  alias ExMpd.State
+  import  ExMpd.Util
+  alias   ExMpd.Config
+  alias   ExMpd.State
 
   @doc ~S/Start an MPD client instance/
   def start_link(config = %Config{} \\ %Config{}) do

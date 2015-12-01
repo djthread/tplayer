@@ -1,6 +1,5 @@
 defmodule ExMpd.Connection do
-  use GenServer
-
+  use     GenServer
   require Logger
   require Socket
 
@@ -33,8 +32,6 @@ defmodule ExMpd.Connection do
     socket |> send!(command)
     {:reply, socket |> recv_lines_till_ok!, socket}
   end
-
-  # def handle_cast({:
 
 
   ## Additional Things & Stuff

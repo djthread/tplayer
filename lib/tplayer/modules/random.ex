@@ -14,10 +14,6 @@ defmodule TPlayer.Modules.Random do
     {:reply, tracks, st}
   end
 
-  def cast({:merge_state, state = %{}}, st = %State{}) do
-    {:noreply, st |> Map.merge(state)}
-  end
-
   defp _get_random_tracks(_number, _acc, %State{albums: albums}) when albums |> length == 0 do
     nil
   end

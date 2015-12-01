@@ -1,6 +1,5 @@
 defmodule ExMpd do
-  import ExMpd.Pool
-
+  import  ExMpd.Pool
   require Logger
 
   # @worker __MODULE__.Worker

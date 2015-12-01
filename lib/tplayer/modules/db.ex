@@ -1,5 +1,6 @@
 defmodule TPlayer.Modules.Db do
-  alias TPlayer.State
+  require Logger
+  alias   TPlayer.State
 
   def init(st = %State{}) do
     st
@@ -9,9 +10,19 @@ defmodule TPlayer.Modules.Db do
 
   def cast_refresh_albums(st = %State{}) do
     spawn_link fn ->
-      albums = ExMpd.call {:command, "list album"}
+      albums = ExMpd.call({:command, "list album"})
+               # |> Enum.map(&String.trim_prefix(&1, "Album: "))  # waiting for 1.2
+               |> Enum.map(fn(a) ->
+                             case Regex.run(~r/^Album: (.*)$/, a) do
+                               [_, a] -> a
+                               _      -> ""
+                             end
+                          end)
+               |> Enum.filter(&(&1 != ""))
+
       TPlayer.cast {:merge_state, %{albums: albums}}
       :ok = File.write! _cache_file(st), Enum.join(albums, "\n")
+      Logger.info "Finished album refresh, found #{length(albums)}"
     end
     {:noreply, st}
   end
