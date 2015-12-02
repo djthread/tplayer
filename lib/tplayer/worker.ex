@@ -10,10 +10,10 @@ defmodule TPlayer.Worker do
   end
 
   @doc ~S/Dispatch a call request/
-  def call(req), do: GenServer.call __MODULE__, :call, [req]
+  def call(req), do: GenServer.call __MODULE__, req
 
   @doc ~S/Dispatch a cast/
-  def cast(msg), do: GenServer.cast __MODULE__, :call, [msg]
+  def cast(msg), do: GenServer.cast __MODULE__, msg
 
 
   ## GenServer Implementation
@@ -38,6 +38,8 @@ defmodule TPlayer.Worker do
                          _    -> acc
                        end
                      end
+
+    cast :refresh_albums
 
     Logger.debug "State: " <> inspect st
 

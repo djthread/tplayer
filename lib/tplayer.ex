@@ -1,8 +1,8 @@
 defmodule TPlayer do
   use Application
 
-  @exmpd   ExMpd.Worker
-  @tplayer TPlayer.Worker
+  @exmpd  ExMpd.Worker
+  @worker TPlayer.Worker
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
@@ -14,7 +14,7 @@ defmodule TPlayer do
     #   port: Application.get_env(:tplayer, :mpd_port)
     # }])
 
-    tplayer = worker(@tplayer, [%TPlayer.Config{
+    tplayer = worker(@worker, [%TPlayer.Config{
       base_dir: "~/.tplayer",
       modules:  Application.get_env(:tplayer, :modules)
     }])
@@ -28,19 +28,12 @@ defmodule TPlayer do
     Supervisor.start_link children, opts
   end
 
-  # calls
-  def state,        do: GenServer.call @tplayer, :state
-
-  # casts
-  def refresh,      do: GenServer.cast @tplayer, :refresh_albums
-
   # generic calls
-  def call(inputs), do: GenServer.call @tplayer, inputs
-  def cast(inputs), do: GenServer.cast @tplayer, inputs
+  def call(input), do: @worker.call input
+  def cast(input), do: @worker.cast input
 end
 
 defmodule TP do
-  def ref,          do: TP.refresh
-  def refresh,      do: TPlayer.refresh
-  def cast(inputs), do: TPlayer.cast inputs
+  def call(input), do: @worker.call input
+  def cast(input), do: @worker.cast input
 end
