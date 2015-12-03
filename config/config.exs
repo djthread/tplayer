@@ -48,10 +48,8 @@ config :pooler, pools: [
   [
     name:       :mpd,
     group:      :mpd,
-    # max_count:  1,
-    # init_count: 1,
-    max_count:  5,
     init_count: 2,
+    max_count:  5,
     start_mfa:  {ExMpd.Connection, :start_link, [mpd_host, mpd_port]}
   ]
 ]
