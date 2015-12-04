@@ -38,10 +38,12 @@ mpd_port = 6600
 config :tplayer, mpd_host:  mpd_host,
                  mpd_port:  mpd_port,
                  cache_dir: Path.expand("~/.tplayer/"),
+                 # latest_album_count: 1000,
+                 # latest_dir: "tmp/stage5"
                  modules:   [
-                   TPlayer.Modules.Core,
-                   TPlayer.Modules.Db,
-                   TPlayer.Modules.Random
+                   {TPlayer.Modules.Core,   []},
+                   {TPlayer.Modules.Db,     []},
+                   {TPlayer.Modules.Random, []}
                  ]
 
 config :pooler, pools: [
