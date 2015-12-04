@@ -1,5 +1,6 @@
 defmodule TPlayer.Worker do
   use     GenServer
+  import  TPlayer.Util, only: [dispatch: 4]
   require Logger
   alias   TPlayer.Config
   alias   TPlayer.State
@@ -39,33 +40,10 @@ defmodule TPlayer.Worker do
 
   @doc ~S/Invoke an action. We'll figure out which module it's for./
   def handle_call(req, _from, st = %State{}) when is_atom(req) or is_tuple(req) do
-    _dispatch :call, req, TPlayer.modules, st
+    dispatch :call, req, TPlayer.modules, st
   end
   def handle_cast(msg, st = %State{})        when is_atom(msg) or is_tuple(msg) do
-    _dispatch :cast, msg, TPlayer.modules, st
-  end
-
-  defp _dispatch(type, input, modules, st = %State{}) do
-    to_f_atom = fn(name) -> Atom.to_string(type) <> "_#{name}" |> String.to_atom end
-    cond do
-      is_atom(input) ->
-        [input |> to_f_atom.()]
-      is_tuple(input) ->
-        list = Tuple.to_list(input)
-        [hd(list) |> to_f_atom.() | tl(list)]
-    end
-    |> _dispatch modules, st
-  end
-  defp _dispatch([f_atom | params], [mod | tail], st = %State{}) when is_atom(f_atom) do
-    if {f_atom, length(params) + 1} in mod.__info__(:functions) do
-      Logger.debug "Invoking #{Atom.to_string mod}.#{Atom.to_string f_atom}..."
-      apply mod, f_atom, params ++ [st]
-    else
-      _dispatch [f_atom | params], tail, st
-    end
-  end
-  defp _dispatch([f_atom | params], [], _) do
-    {:error, "No method found: " <> Atom.to_string(f_atom) <> " (#{inspect params})"}
+    dispatch :cast, msg, TPlayer.modules, st
   end
 
 end

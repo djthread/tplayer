@@ -37,7 +37,8 @@ mpd_port = 6600
 
 config :tplayer, mpd_host:  mpd_host,
                  mpd_port:  mpd_port,
-                 cache_dir: Path.expand("~/.tplayer/"),
+                 base_dir:  "~/.tplayer/",
+                 cache_dir: "cache",
                  # latest_album_count: 1000,
                  # latest_dir: "tmp/stage5"
                  modules:   [
