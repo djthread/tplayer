@@ -12,12 +12,7 @@ defmodule TPlayer.Modules.Db do
     spawn_link fn ->
       albums = ExMpd.call({:command, "list album"})
                # |> Enum.map(&String.trim_prefix(&1, "Album: "))  # waiting for 1.2
-               |> Enum.map(fn(a) ->
-                             case Regex.run(~r/^Album: (.*)$/, a) do
-                               [_, a] -> a
-                               _      -> ""
-                             end
-                          end)
+               |> Enum.map(&String.replace(&1, "Album: ", ""))
                |> Enum.filter(&(&1 != ""))
 
       TPlayer.cast {:merge_state, %{albums: albums}}

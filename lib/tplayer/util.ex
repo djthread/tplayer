@@ -17,8 +17,14 @@ defmodule TPlayer.Util do
     |> dispatch modules, st
   end
   def dispatch([f_atom | params], [mod | tail], st = %State{}) when is_atom(f_atom) do
+    log = fn -> mod
+      |> Atom.to_string
+      |> String.replace("Elixir.TPlayer.Modules.", "")
+      |> (&("Invoking #{&1}.#{Atom.to_string f_atom}...")).()
+      |> Logger.debug
+    end
     if {f_atom, length(params) + 1} in mod.__info__(:functions) do
-      Logger.debug "Invoking #{Atom.to_string mod}.#{Atom.to_string f_atom}..."
+      log.()
       apply mod, f_atom, params ++ [st]
     else
       dispatch [f_atom | params], tail, st
