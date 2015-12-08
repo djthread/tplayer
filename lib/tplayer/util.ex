@@ -6,7 +6,10 @@ defmodule TPlayer.Util do
   def fix_path(path, base),             do: Path.expand(path, base)
 
   def dispatch(type, input, modules, st = %State{}) do
-    to_f_atom = fn(name) -> Atom.to_string(type) <> "_#{name}" |> String.to_atom end
+    to_f_atom = fn(name) ->
+      Atom.to_string(type) <> "_#{name}"
+      |> String.to_atom
+    end
     cond do
       is_atom(input) ->
         [input |> to_f_atom.()]
@@ -16,7 +19,8 @@ defmodule TPlayer.Util do
     end
     |> dispatch modules, st
   end
-  def dispatch([f_atom | params], [mod | tail], st = %State{}) when is_atom(f_atom) do
+  def dispatch([f_atom | params], [mod | tail], st = %State{})
+  when is_atom(f_atom) do
     log = fn -> mod
       |> Atom.to_string
       |> String.replace("Elixir.TPlayer.Modules.", "")
@@ -30,8 +34,14 @@ defmodule TPlayer.Util do
       dispatch [f_atom | params], tail, st
     end
   end
-  def dispatch([f_atom | params], [], _) do
-    {:error, "No method found: " <> Atom.to_string(f_atom) <> " (#{inspect params})"}
+  def dispatch([f_atom | params], [], st = %State{}) do
+    func_str = f_atom |> Atom.to_string
+    case func_str |> String.slice(0, 5) do
+      "cast_" ->
+        {:noreply, st}
+      "call_" ->
+        {:reply, "No method found: #{func_str} (#{inspect params})", st}
+    end
   end
 
 end

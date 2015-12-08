@@ -8,21 +8,25 @@ defmodule TPlayer.Modules.Random do
     st
   end
 
-  def call({:random_track, number}, st = %State{}) when number |> is_integer do
-    tracks = _get_random_tracks number, [], st
-
+  def call_random_tracks(number, st = %State{})
+  when is_integer(number) do
+    tracks = get_random_tracks number, [], st
     {:reply, tracks, st}
   end
 
-  defp _get_random_tracks(_number, _acc, %State{albums: albums}) when albums |> length == 0 do
+
+  ##
+  #
+
+  defp get_random_tracks(_number, _acc, %State{albums: albums})
+  when length(albums) == 0 do
     nil
   end
-  defp _get_random_tracks(number, acc, %State{albums: albums}) do
+  defp get_random_tracks(number, acc, %State{albums: albums}) do
     random_album = Enum.random(albums)
-    Logger.info random_album
     tracks       = ExMpd.call {:find_album, random_album}
+    Logger.info tracks
     2
-    # Logger.info tracks
   end
 
 end

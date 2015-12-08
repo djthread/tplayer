@@ -32,6 +32,11 @@ defmodule ExMpd.Connection do
     socket |> send!(command)
     {:reply, socket |> recv_lines_till_ok!, socket}
   end
+  def handle_call({:find_album, album}, _from, socket) do
+    socket |> send!("find album #{album}")
+    {:reply, socket |> recv_lines_till_ok!, socket}
+  end
+
 
 
   ## Additional Things & Stuff
@@ -44,6 +49,8 @@ defmodule ExMpd.Connection do
     acc = acc <> cur
     if String.ends_with?(acc, "\nOK\n") do
       acc |> String.split("\n")
+          |> List.delete("OK")
+          |> List.delete_at(-1)
     else
       _recv_lines_till_ok! socket, recv!(socket), acc, albums
     end

@@ -21,7 +21,7 @@ defmodule TPlayer.Worker do
   #
 
   def init(_) do
-    # Run module init routines, pipelining the state through
+    # Run module init routines, pipelining the state through each
     st = Enum.reduce TPlayer.modules,
                      %State{},
                      fn(m, acc) ->
@@ -33,16 +33,18 @@ defmodule TPlayer.Worker do
 
     cast :refresh_albums
 
-    Logger.debug "State: " <> inspect st
+    Logger.debug "Init state: " <> inspect st
 
     {:ok, st}
   end
 
   @doc ~S/Invoke an action. We'll figure out which module it's for./
-  def handle_call(req, _from, st = %State{}) when is_atom(req) or is_tuple(req) do
+  def handle_call(req, _from, st = %State{})
+  when is_atom(req) or is_tuple(req) do
     dispatch :call, req, TPlayer.modules, st
   end
-  def handle_cast(msg, st = %State{})        when is_atom(msg) or is_tuple(msg) do
+  def handle_cast(msg, st = %State{})
+  when is_atom(msg) or is_tuple(msg) do
     dispatch :cast, msg, TPlayer.modules, st
   end
 
