@@ -8,14 +8,14 @@ This project is very, very much a work in progress. Not much functionality is av
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
 
-  1. Add exmpd to your list of dependencies in `mix.exs`:
+  1. Add tplayer to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:exmpd, "~> 0.0.1"}]
+          [{:tplayer, "~> 0.0.1"}]
         end
 
-  2. Ensure exmpd is started before your application:
+  2. Ensure tplayer is started before your application:
 
         def application do
-          [applications: [:exmpd]]
+          [applications: [:tplayer]]
         end
