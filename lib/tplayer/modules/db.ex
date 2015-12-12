@@ -22,20 +22,20 @@ defmodule TPlayer.Modules.Db do
     {:noreply, st}
   end
 
-  defp _load_albums_from_cache(st = %State{}) do
-    file          = _cache_file(st)
-    cache_exists? = File.exists? file
-
-    if cache_exists? do
-      albums = File.read!(file) |> String.split("\n")
-      Map.put st, :albums, albums
-    else
-      st
-    end
-  end
-
-  defp _cache_file(st = %State{}) do
-    st.config.cache_dir <> "/albums"
-  end
+  # defp _load_albums_from_cache(st = %State{}) do
+  #   file          = _cache_file(st)
+  #   cache_exists? = File.exists? file
+  #
+  #   if cache_exists? do
+  #     albums = File.read!(file) |> String.split("\n")
+  #     Map.put st, :albums, albums
+  #   else
+  #     st
+  #   end
+  # end
+  #
+  # defp _cache_file(st = %State{}) do
+  #   st.config.cache_dir <> "/albums"
+  # end
 
 end

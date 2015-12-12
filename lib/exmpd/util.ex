@@ -9,7 +9,7 @@ defmodule ExMpd.Util do
     str |> String.split("\n") |> parse_status(state)
   end
   def parse_status([head | tail], state = %State{}) do
-    m = Regex.run(~r/^(\w+): (.+)$/, head)
+    m = Regex.run ~r/^(\w+): (.+)$/, head
     if !is_nil(m) && ([_, k, v] = m) do
       state = Map.put state, String.to_atom(k), v
     end

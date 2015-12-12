@@ -33,8 +33,12 @@ defmodule ExMpd.Connection do
     {:reply, socket |> recv_lines_till_ok!, socket}
   end
   def handle_call({:find_album, album}, _from, socket) do
-    socket |> send!("find album #{album}")
-    {:reply, socket |> recv_lines_till_ok!, socket}
+    socket |> send!(~s/find album "#{album}"/)
+    {
+      :reply,
+      socket |> recv_lines_till_ok! |> collect_songs,
+      socket
+    }
   end
 
 
@@ -46,6 +50,7 @@ defmodule ExMpd.Connection do
     _recv_lines_till_ok! socket, recv!(socket), "", []
   end
   defp _recv_lines_till_ok!(socket, cur, acc, albums) do
+    Logger.debug " > #{cur}"
     acc = acc <> cur
     if String.ends_with?(acc, "\nOK\n") do
       acc |> String.split("\n")
@@ -55,6 +60,8 @@ defmodule ExMpd.Connection do
       _recv_lines_till_ok! socket, recv!(socket), acc, albums
     end
   end
+
+  defp collect_songs(lines
 
   # def recv_ok!(socket, state) do
   #   "OK\n" = Socket.Stream.recv!(socket, state)
